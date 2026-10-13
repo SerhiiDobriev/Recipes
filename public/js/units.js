@@ -19,6 +19,7 @@ export const UNITS = {
   can:    { forms: ['банка', 'банки', 'банок'], kind: 'count' },
   slice:  { forms: ['ломтик', 'ломтика', 'ломтиков'], kind: 'count' },
   sprig:  { forms: ['веточка', 'веточки', 'веточек'], kind: 'count' },
+  handful: { forms: ['горсть', 'горсти', 'горстей'], kind: 'count' },
 };
 
 // Граница слова для кириллицы (\b в JS её не понимает)
@@ -42,6 +43,7 @@ const UNIT_PATTERNS = [
   ['can', 'банк(?:а|и|у)|банок'],
   ['slice', 'ломтик(?:а|ов)?|ломт'],
   ['sprig', 'веточк(?:а|и|у)|веточек|ветк(?:а|и|у)'],
+  ['handful', 'горст(?:ь|и|ей|ью)'],
 ].map(([key, p]) => [key, new RegExp('^(?:' + p + ')\\.?' + B, 'i')]);
 
 export function matchUnit(s) {
@@ -104,8 +106,9 @@ export function formatNumber(v, unit) {
   const kind = UNITS[unit]?.kind;
   if (unit === 'g' || unit === 'ml') return decimal(roundMetric(v), 1);
   if (unit === 'kg' || unit === 'l') return decimal(v, 2);
-  if (unit === 'tsp') return fraction(v, v < 1 ? 1 / 8 : 1 / 4);
-  if (kind === 'spoon') return fraction(v, 1 / 4);
+  if (unit === 'tsp') return fraction(v, v < 1 ? 1 / 8 : v >= 3 ? 1 / 2 : 1 / 4);
+  // много ложек — до половинок: «6½ ст. л.», а не «6⅔»
+  if (kind === 'spoon') return fraction(v, unit === 'tbsp' && v >= 3 ? 1 / 2 : 1 / 4);
   if (kind === 'count') return fraction(v, v < 1 ? 1 / 4 : 1 / 2);
   // без единицы (яйца, лимоны): целые и половинки
   if (v >= 10) return String(Math.round(v));
@@ -247,8 +250,8 @@ function toMl(qty, unit, cupMl) {
 }
 
 function metricOut(qty, unit) {
-  if (unit === 'g' && qty >= 2000) return { qty: qty / 1000, unit: 'kg' };
-  if (unit === 'ml' && qty >= 2000) return { qty: qty / 1000, unit: 'l' };
+  if (unit === 'g' && qty >= 1000) return { qty: qty / 1000, unit: 'kg' };
+  if (unit === 'ml' && qty >= 1000) return { qty: qty / 1000, unit: 'l' };
   return { qty, unit };
 }
 
@@ -298,7 +301,10 @@ export function presentAmount(item, factor, mode, ctx) {
     const ratio = a.qty / q;
     return formatQty(a.qty, qMax != null ? qMax * ratio : null, a.unit);
   };
-  const original = formatQty(q, qMax, unit);
+  const big = metricOut(Math.max(q, qMax ?? 0), unit);
+  const original = big.unit !== unit
+    ? formatQty(q / 1000, qMax != null ? qMax / 1000 : null, big.unit)  // 1000 г → 1 кг
+    : formatQty(q, qMax, unit);
   if (mode === 'metric') {
     const c = conv(toMetric);
     return c ? { text: c, hint: '', converted: true } : { text: original, hint: '' };

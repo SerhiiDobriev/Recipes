@@ -29,6 +29,9 @@ test('пересчёт порций и перевод мер', () => {
   assert.equal(amount('Сахар — 200 г', 1, 'spoons'), '1 стакан');
   assert.equal(amount('Мёд — 3 ст. л.', 1, 'metric'), '90 г');
   assert.equal(amount('Масло сливочное — 100 г', 1, 'spoons'), '5 ст. л.');
+  assert.equal(amount('Творог — 500 г', 2), '1 кг');
+  assert.equal(amount('Вода — 100 мл', 1, 'spoons'), '6½ ст. л.');
+  assert.equal(amount('Изюм — 1,5 горсти', 2), '3 горсти');
 });
 
 test('рецепт целиком', () => {
