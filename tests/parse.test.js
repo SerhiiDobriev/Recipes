@@ -40,3 +40,11 @@ test('рецепт целиком', () => {
   assert.equal(r.ingredientsText, 'Творог — 500 г\nЯйцо — 1 шт');
   assert.equal(r.stepsText.split('\n').length, 2);
 });
+
+test('таблица мер: в столовой ложке примерно 3 чайные', async () => {
+  const { DENSITIES } = await import('../public/js/units.js');
+  for (const d of DENSITIES) {
+    const ratio = d.tbsp / d.tsp;
+    assert.ok(ratio >= 2.5 && ratio <= 3.5, `${d.name}: ст. л. ${d.tbsp} г, ч. л. ${d.tsp} г`);
+  }
+});
