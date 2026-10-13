@@ -1,0 +1,13 @@
+{
+  "name": "moya-knizhechka",
+  "private": true,
+  "description": "Моя книжечка рецептов: сайт и сервер",
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "start": "node server/server.js",
+    "test": "node --test tests/*.test.js"
+  }
+}

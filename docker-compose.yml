@@ -1,0 +1,11 @@
+# Книжечка на сервере: доступна только самому серверу на 127.0.0.1:3200,
+# снаружи её открывает nginx по адресу https://recipes.tutormate.site
+services:
+  recipes:
+    build: .
+    container_name: recipes
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3200:3000"
+    volumes:
+      - /opt/recipes/data:/data
