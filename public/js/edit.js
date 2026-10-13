@@ -62,11 +62,17 @@ export async function renderEdit(host, id, { paste = false } = {}) {
       <label class="field"><span>Название</span>
         <input id="f-title" required value="${esc(recipe.title)}" placeholder="Например, Медовик" autocomplete="off"></label>
 
-      <div class="field-row">
+      <div class="field">
         <label class="field"><span>Категория</span>
-          <input id="f-category" list="cat-list" value="${esc(recipe.category)}" placeholder="Торты" autocomplete="off">
-          <datalist id="cat-list">${cats.map((c) => `<option value="${esc(c)}">`).join('')}</datalist></label>
-        <label class="field narrow"><span>Порций</span>
+          <input id="f-category" value="${esc(recipe.category)}" placeholder="Торты" autocomplete="off"></label>
+        <!-- Подсказки категорий кнопками: выпадающий список на телефонах почти не работает -->
+        <div class="cat-chips" id="cat-chips" role="group" aria-label="Выбрать категорию">
+          ${cats.map((c) => `<button type="button" class="chip small" data-cat="${esc(c)}">${esc(c)}</button>`).join('')}
+        </div>
+      </div>
+
+      <div class="field-row two">
+        <label class="field"><span>Порций</span>
           <input id="f-servings" type="number" inputmode="decimal" min="0.5" step="0.5" value="${recipe.servings ?? ''}" placeholder="4"></label>
         <label class="field"><span>Время</span>
           <input id="f-time" value="${esc(recipe.time)}" placeholder="1 ч 30 мин"></label>
@@ -101,6 +107,17 @@ export async function renderEdit(host, id, { paste = false } = {}) {
   </div>`;
 
   const $ = (s) => root.querySelector(s);
+  const catInput = $('#f-category');
+  const markCategory = () => root.querySelectorAll('#cat-chips [data-cat]').forEach((b) => b.classList.toggle('active', b.dataset.cat === catInput.value.trim()));
+  markCategory();
+  catInput.addEventListener('input', markCategory);
+  $('#cat-chips').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-cat]');
+    if (!b) return;
+    catInput.value = b.dataset.cat;
+    catInput.dispatchEvent(new Event('input', { bubbles: true }));
+  });
+
   const ingInput = $('#f-ing');
   const preview = $('#ing-preview');
   const drawPreview = () => {
