@@ -86,6 +86,7 @@ export async function renderRecipe(host, id) {
           </div>
           <div class="quick">
             <button class="chip" data-mult="0.5">×½</button>
+            <button class="chip" data-mult="1.5">×1½</button>
             <button class="chip" data-mult="2">×2</button>
             <button class="chip" data-mult="3">×3</button>
             <button class="chip ghost" data-act="reset" id="serv-reset">как в рецепте: ${fmtServ(base)}</button>
