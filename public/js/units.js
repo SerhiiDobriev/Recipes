@@ -301,10 +301,14 @@ export function presentAmount(item, factor, mode, ctx) {
     const ratio = a.qty / q;
     return formatQty(a.qty, qMax != null ? qMax * ratio : null, a.unit);
   };
-  const big = metricOut(Math.max(q, qMax ?? 0), unit);
+  const top = Math.max(q, qMax ?? 0);
+  const big = metricOut(top, unit);
+  const small = (unit === 'kg' || unit === 'l') && top < 1 ? (unit === 'kg' ? 'g' : 'ml') : null;
   const original = big.unit !== unit
     ? formatQty(q / 1000, qMax != null ? qMax / 1000 : null, big.unit)  // 1000 г → 1 кг
-    : formatQty(q, qMax, unit);
+    : small
+      ? formatQty(q * 1000, qMax != null ? qMax * 1000 : null, small)  // 0,31 л → 310 мл
+      : formatQty(q, qMax, unit);
   if (mode === 'metric') {
     const c = conv(toMetric);
     return c ? { text: c, hint: '', converted: true } : { text: original, hint: '' };

@@ -81,7 +81,7 @@ export async function renderRecipe(host, id) {
         <div class="servings">
           <div class="stepper" role="group" aria-label="Количество порций">
             <button class="round" data-act="minus" aria-label="Меньше порций">${icon('minus')}</button>
-            <div class="serv-value"><output id="serv-out">${fmtServ(ui.servings)}</output><span id="serv-word">${servingsWord(ui.servings)}</span></div>
+            <label class="serv-value"><input id="serv-out" class="serv-input" type="text" inputmode="decimal" autocomplete="off" value="${fmtServ(ui.servings)}" aria-label="Количество порций, можно вписать любое, например 2,5"><span id="serv-word">${servingsWord(ui.servings)}</span></label>
             <button class="round" data-act="plus" aria-label="Больше порций">${icon('plus')}</button>
           </div>
           <div class="quick">
@@ -134,7 +134,8 @@ export async function renderRecipe(host, id) {
         <span class="nm">${esc(it.name || '')}${it.note ? `<span class="note">, ${esc(it.note)}</span>` : ''}${a.hint ? `<span class="alt">≈ ${esc(a.hint)}</span>` : ''}</span>
       </li>`;
     }).join('') || '<li class="muted">Ингредиенты не записаны.</li>';
-    root.querySelector('#serv-out').textContent = fmtServ(ui.servings);
+    const servInput = root.querySelector('#serv-out');
+    if (document.activeElement !== servInput) servInput.value = fmtServ(ui.servings);
     root.querySelector('#serv-word').textContent = servingsWord(ui.servings);
     root.querySelector('#serv-reset').classList.toggle('active', ui.servings === base);
   };
@@ -144,6 +145,21 @@ export async function renderRecipe(host, id) {
     ui.servings = Math.max(0.25, Math.round(v * 100) / 100);
     drawIngredients();
   };
+
+  // Поле порций: можно вписать любое число, например 2,5
+  const servInput = root.querySelector('#serv-out');
+  const typedServings = () => parseFloat(servInput.value.replace(',', '.').replace(/[^\d.]/g, ''));
+  servInput.addEventListener('input', () => {
+    const v = typedServings();
+    if (v > 0) setServings(v);
+  });
+  servInput.addEventListener('change', () => {
+    const v = typedServings();
+    setServings(v > 0 ? v : ui.servings);
+    servInput.value = fmtServ(ui.servings);
+  });
+  servInput.addEventListener('focus', () => servInput.select());
+  servInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') servInput.blur(); });
 
   root.querySelectorAll('input[name="unitmode"]').forEach((r) => r.addEventListener('change', () => {
     mode = r.value;

@@ -220,7 +220,13 @@ a.meta-item { color: var(--accent); text-decoration: underline; text-underline-o
 }
 .round:hover { border-color: var(--accent); color: var(--accent); }
 .serv-value { display: flex; align-items: baseline; gap: 8px; min-width: 7.5em; justify-content: center; }
-.serv-value output { font: 700 1.9rem var(--font-display); font-variant-numeric: tabular-nums; color: var(--accent); }
+.serv-value { cursor: text; }
+.serv-value .serv-input {
+  width: 3.4em; min-height: 0; padding: 2px 4px; text-align: center;
+  font: 700 1.9rem var(--font-display); font-variant-numeric: tabular-nums; color: var(--accent);
+  background: transparent; border: 0; border-bottom: 2px dashed var(--line); border-radius: 0;
+}
+.serv-value .serv-input:focus { border-bottom-color: var(--accent); outline: none; background: var(--accent-soft); border-radius: 8px 8px 0 0; }
 .serv-value span { color: var(--muted); font-weight: 500; }
 .quick { display: flex; flex-wrap: wrap; gap: 6px; }
 .quick .chip { min-height: 32px; padding: 0 12px; font-variant-numeric: tabular-nums; }
